@@ -1,0 +1,56 @@
+version: 0.2
+run-as: root
+
+phases:
+
+  install:
+    commands:
+      - echo Installing app dependencies...
+      # - curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.18.9/2020-11-02/bin/linux/amd64/kubectl   
+      - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+      - chmod +x ./kubectl
+      - cp kubectl /usr/bin/kubectl
+
+  pre_build:
+    commands:
+      - echo Logging in to Amazon EKS...
+      - aws eks --region $AWS_DEFAULT_REGION update-kubeconfig --name $AWS_CLUSTER_NAME
+      # - cat /root/.kube/config
+      - echo check config 
+      - kubectl config view --minify
+      - echo check kubectl access
+      #- kubectl get svc
+      # - echo Logging in to Amazon ECR...
+      # - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      # - REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME
+      # - docker pull $REPOSITORY_URI:$IMAGE_TAG
+      
+
+  build:
+    commands:
+      - kubectl get svc
+      # - echo Build started on `date`
+      # - echo Building the Docker image...
+
+      # Creates docker image with given env variable          
+      # - docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG .
+      # - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG 
+
+      # creates image with commit id
+      # CODEBUILD_RESOLVED_SOURCE_VERSION - This variable contains the commit ID
+      # - docker build -t $IMAGE_REPO_NAME:$CODEBUILD_RESOLVED_SOURCE_VERSION .
+      # - docker tag $IMAGE_REPO_NAME:$CODEBUILD_RESOLVED_SOURCE_VERSION $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$CODEBUILD_RESOLVED_SOURCE_VERSION
+
+  # post_build:
+  #   commands:
+      # - echo Build completed on `date`
+      # - echo Pushing the Docker image...
+      # - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
+      # - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$CODEBUILD_RESOLVED_SOURCE_VERSION
+
+      # - echo Push the latest image to cluster
+      # - sed -i "s@latest@$CODEBUILD_RESOLVED_SOURCE_VERSION@g" web_deployment.yaml
+      # - kubectl apply -f web_deployment.yaml
+      # - kubectl apply -f web_service.yaml
+      # get the dns 
+      # create a record in route53 through terraform
